@@ -19,16 +19,16 @@ def check_download():
 	active =  int(p.stdout.read())-2
 
 	p = subprocess.Popen("transmission-remote localhost  --list |grep \"100%\" |  wc -l", stdout=subprocess.PIPE ,shell=True)
-	done =  int(p.stdout.read())-2
+	done =  int(p.stdout.read())
 	if active > 0:
 		GPIO.output(23, True)  
 	else:
 		GPIO.output(23, False)  
 	
 	if done > 0:
-		GPIO.output(24, True)  
+		GPIO.output(18, True)  
 	else:
-		GPIO.output(24, False)  
+		GPIO.output(18, False)  
 		
 
 		
