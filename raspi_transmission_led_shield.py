@@ -9,6 +9,7 @@ def transmission_is_up():
 		server = transmissionrpc.Client("localhost")
 	except:
 		GPIO.output(18, False)  
+		GPIO.output(22, False)  
 		GPIO.output(23, False)  
 		GPIO.output(24, True) 
 		return False
@@ -51,36 +52,75 @@ def transmission_on_off(oldstatus):
 	
 	if oldstatus==True:
 		return True
+	print("button")
 
 	status = transmission_is_up()
 	GPIO.output(18, True)  
 	GPIO.output(23, True)  
 	GPIO.output(24, True) 
-	print "slipping"
 
 	if status:
-		print ("killing transmission")
 		subprocess.Popen("killall transmission-daemon", shell=True)
 		subprocess.Popen("umount /home/alorenzi/Transmission", shell=True)
 	else:
-		print ("starting transmission")
 		subprocess.Popen("mount -L transmission ", shell=True)
 		subprocess.Popen("su alorenzi -c transmission-daemon", shell=True)
 	
 	return True
 
+def modify_alt_speed(alt_speed_pressed, alt_speed):
+	# Read if alt speed button is pressed. 
+	# i wonder why if not pressed return value is a random value (true/false)
+	# while if is pressed is true
+
+	count = 0
+	while count < 5000:
+		if GPIO.input(17) == True:
+			return (False, alt_speed)
+		count +=1
+	
+	
+	if alt_speed_pressed==True:
+		return (True, alt_speed)
+
+
+
+	if alt_speed:
+		#  set alt_speed off
+		subprocess.Popen("transmission-remote localhost --no-alt-speed", shell=True)
+		GPIO.output(22, False)  
+		return(True, False)
+	else:
+		# set alt_speed on
+		subprocess.Popen("transmission-remote localhost --alt-speed", shell=True)
+		GPIO.output(22, True)  
+		return(True, True)
+
 	
 
+# Port description:
+# 18: green led
+# 17: alternate speed button
+# 22: alternate speed led
+# 23: yellow led
+# 24: red led
+# 25: on/off button
+	
+# Setup GPIO
 GPIO.setmode(GPIO.BCM)  
-GPIO.setup(18, GPIO.OUT) # definiamo che il la GPIO18 (pin12) è un uscita
-GPIO.setup(23, GPIO.OUT) # definiamo che il la GPIO18 (pin12) è un uscita
-GPIO.setup(24, GPIO.OUT) # definiamo che il la GPIO18 (pin12) è un uscita
-GPIO.setup(25, GPIO.IN) # definiamo che il GPIO17 è un ingresso
+GPIO.setup(18, GPIO.OUT)
+GPIO.setup(17, GPIO.IN) 
+GPIO.setup(22, GPIO.OUT) 
+GPIO.setup(23, GPIO.OUT) 
+GPIO.setup(24, GPIO.OUT) 
+GPIO.setup(25, GPIO.IN)
 
 r = 0
 
 
 oldstatus = False
+alt_speed = False
+alt_speed_pressed = False
 while 1:
 	if r == 0:
 		r = 1000
@@ -89,6 +129,8 @@ while 1:
 	r -= 1
 	
 	oldstatus=transmission_on_off(oldstatus)
+
+	(alt_speed_pressed, alt_speed) = modify_alt_speed(alt_speed_pressed, alt_speed)
 	
 	if oldstatus:
 		time.sleep(1)
