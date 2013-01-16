@@ -1,0 +1,9 @@
+[Unit]
+Description=Transmission led Shield
+After=network.target
+
+[Service]
+ExecStart=/usr/sbin/raspi_transmission_led_shield
+
+[Install]
+WantedBy=multi-user.target

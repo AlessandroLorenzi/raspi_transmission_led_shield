@@ -1,4 +1,4 @@
-raspi_transmission_led_shield_
+raspi\_transmission\_led\_shield
 =============================
 
 An easy project to test RaspberryPI GPIO. 
@@ -12,4 +12,7 @@ giving a look to 3 leds:
 In connections.png there is a (horrible) schema of connections.
 
 
+put raspi\_transmission\_led\_shield.service in /usr/lib/systemd/system/
 
+then
+systemctl enable  raspi\_transmission\_led\_shield.service
